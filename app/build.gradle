@@ -1,0 +1,51 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.1"
+
+    defaultConfig {
+        applicationId "io.github.garywahaha.backgroundyoutubeplayer"
+        minSdkVersion 16
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile files('libs/YouTubeAndroidPlayerApi.jar')
+
+    compile 'com.android.support:recyclerview-v7:23.1.1'
+
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.github.HaarigerHarald:android-youtubeExtractor:e9aa87e'
+    compile 'com.google.android.gms:play-services-auth:8.4.0'
+    compile 'com.google.apis:google-api-services-youtube:v3-rev171-1.22.0'
+
+    // Mosby
+    compile 'com.hannesdorfmann.mosby:mvp:2.0.1'
+
+    // Butter Knife
+    compile 'com.jakewharton:butterknife:8.0.1'
+    apt 'com.jakewharton:butterknife-compiler:8.0.1'
+
+    // Dagger 2
+    apt 'com.google.dagger:dagger-compiler:2.2'
+    compile 'com.google.dagger:dagger:2.2'
+    provided 'javax.annotation:jsr250-api:1.0'
+
+    // Glide
+    compile 'com.github.bumptech.glide:glide:3.6.1'
+    compile 'com.android.support:support-v4:23.4.0'
+}
+
+apply plugin: 'com.google.gms.google-services'
