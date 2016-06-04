@@ -9,21 +9,51 @@ import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.*;
+import com.google.api.services.youtube.model.PlaylistListResponse;
 import com.hannesdorfmann.mosby.mvp.MvpNullObjectBasePresenter;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import io.github.garywahaha.backgroundyoutubeplayer.common.Constants;
+import io.github.garywahaha.backgroundyoutubeplayer.playlist.Playlist;
+import io.github.garywahaha.backgroundyoutubeplayer.playlist.PlaylistComponent;
+import io.github.garywahaha.backgroundyoutubeplayer.playlist.PlaylistModel;
 
 /**
  * Created by Gary on 22/5/2016.
  */
 public class PlaylistListPresenter extends MvpNullObjectBasePresenter<PlaylistListView> {
+
+	@Inject
+	PlaylistModel playlistModel;
+
+	public PlaylistListPresenter(PlaylistComponent playlistComponent) {
+		playlistComponent.inject(this);
+	}
+
 	public void loadPlaylists(boolean pullToRefresh) {
-		new YouTubePlaylistsAsyncTask(((PlaylistListFragment)getView()).getActivity()).execute();
+		if (pullToRefresh) {
+			playlistModel.refreshAll(new PlaylistModel.Callbacks() {
+				@Override
+				public void onSuccess() {
+					loadPlaylists(false);
+				}
+
+				@Override
+				public void onError(Exception e) {
+					System.out.println(e.getMessage());
+				}
+			});
+		}
+		else {
+			List<Playlist> playlists = playlistModel.getAll();
+			getView().setData(playlists);
+			getView().showContent();
+		}
 	}
 
 	public class YouTubePlaylistsAsyncTask extends AsyncTask<Void, Void, List<io.github.garywahaha.backgroundyoutubeplayer.playlist.Playlist>> {
@@ -63,7 +93,7 @@ public class PlaylistListPresenter extends MvpNullObjectBasePresenter<PlaylistLi
 				for (com.google.api.services.youtube.model.Playlist x : result) {
 					io.github.garywahaha.backgroundyoutubeplayer.playlist.Playlist playlist = new io.github.garywahaha.backgroundyoutubeplayer.playlist.Playlist();
 					playlist.setTitle(x.getSnippet().getTitle());
-					playlist.setPlaylist_id(x.getId());
+					playlist.setPlaylistId(x.getId());
 					playlist.setThumbnailUrl(x.getSnippet().getThumbnails().getDefault().getUrl());
 					playlist.setItemCount(x.getContentDetails().getItemCount());
 					target.add(playlist);

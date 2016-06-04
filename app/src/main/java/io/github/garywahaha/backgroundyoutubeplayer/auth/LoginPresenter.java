@@ -28,7 +28,7 @@ public class LoginPresenter extends MvpNullObjectBasePresenter<LoginView> {
 			getView().showLoginForm();
 		}
 		else {
-			loginManager.excecute(account, new LoginManager.Callbacks() {
+			loginManager.execute(account, new LoginManager.Callbacks() {
 				@Override
 				public void onLoginSuccess() {
 					getView().loginSuccess();

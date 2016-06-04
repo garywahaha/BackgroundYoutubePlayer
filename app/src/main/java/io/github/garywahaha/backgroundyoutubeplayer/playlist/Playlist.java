@@ -1,15 +1,27 @@
 package io.github.garywahaha.backgroundyoutubeplayer.playlist;
 
+import com.raizlabs.android.dbflow.annotation.Column;
+import com.raizlabs.android.dbflow.annotation.PrimaryKey;
+import com.raizlabs.android.dbflow.annotation.Table;
+import com.raizlabs.android.dbflow.structure.BaseModel;
+
+import io.github.garywahaha.backgroundyoutubeplayer.common.AppDatabase;
+
 /**
  * Created by Gary on 22/5/2016.
  */
-public class Playlist {
-	private String playlist_id;
+@Table(database = AppDatabase.class)
+public class Playlist extends BaseModel {
+	@PrimaryKey
+	private String playlistId;
 
+	@Column
 	private String title;
 
+	@Column
 	private String thumbnailUrl;
 
+	@Column
 	private Long itemCount;
 
 	public String getThumbnailUrl() {
@@ -28,12 +40,12 @@ public class Playlist {
 		this.title = title;
 	}
 
-	public String getPlaylist_id() {
-		return playlist_id;
+	public String getPlaylistId() {
+		return playlistId;
 	}
 
-	public void setPlaylist_id(String playlist_id) {
-		this.playlist_id = playlist_id;
+	public void setPlaylistId(String playlistId) {
+		this.playlistId = playlistId;
 	}
 
 	public Long getItemCount() {

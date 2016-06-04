@@ -16,8 +16,11 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.github.garywahaha.backgroundyoutubeplayer.App;
 import io.github.garywahaha.backgroundyoutubeplayer.R;
+import io.github.garywahaha.backgroundyoutubeplayer.playlist.DaggerPlaylistComponent;
 import io.github.garywahaha.backgroundyoutubeplayer.playlist.Playlist;
+import io.github.garywahaha.backgroundyoutubeplayer.playlist.PlaylistComponent;
 import io.github.garywahaha.backgroundyoutubeplayer.video.list.VideoListActivity;
 
 /**
@@ -30,7 +33,17 @@ public class PlaylistListFragment
 	@BindView(R.id.fragment_playlists_recycler_view)
 	RecyclerView recyclerView;
 
+	private PlaylistComponent playlistComponent;
+
 	PlaylistListAdapter playlistListAdapter;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		playlistComponent = DaggerPlaylistComponent.builder()
+		                                           .appComponent(getApp().getAppComponent())
+		                                           .build();
+	}
 
 	@Nullable
 	@Override
@@ -46,6 +59,14 @@ public class PlaylistListFragment
 		playlistListAdapter = new PlaylistListAdapter(getActivity(), this);
 		recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 		recyclerView.setAdapter(playlistListAdapter);
+
+		contentView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				loadData(true);
+			}
+		});
+
 		loadData(false);
 	}
 
@@ -56,7 +77,7 @@ public class PlaylistListFragment
 
 	@Override
 	public PlaylistListPresenter createPresenter() {
-		return new PlaylistListPresenter();
+		return new PlaylistListPresenter(playlistComponent);
 	}
 
 	@Override
@@ -73,7 +94,11 @@ public class PlaylistListFragment
 
 	@Override
 	public void onPlaylistClicked(Playlist playlist) {
-		Intent intent = VideoListActivity.IntentHelper.getIntent(this.getActivity(), playlist.getPlaylist_id());
+		Intent intent = VideoListActivity.IntentHelper.getIntent(this.getActivity(), playlist.getPlaylistId());
 		startActivity(intent);
+	}
+
+	protected App getApp() {
+		return (App) getActivity().getApplicationContext();
 	}
 }

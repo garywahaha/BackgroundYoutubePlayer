@@ -26,7 +26,7 @@ public class LoginManager {
 		void onLoginError(Exception e);
 	}
 
-	public void excecute(Account account, Callbacks callbacks) {
+	public void execute(Account account, Callbacks callbacks) {
 		LoginAsyncTask loginAsyncTask = new LoginAsyncTask(
 				context,
 		        sharedPreferences,
