@@ -18,10 +18,13 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.github.garywahaha.backgroundyoutubeplayer.App;
 import io.github.garywahaha.backgroundyoutubeplayer.service.Constants;
 import io.github.garywahaha.backgroundyoutubeplayer.service.NotificationService;
 import io.github.garywahaha.backgroundyoutubeplayer.R;
+import io.github.garywahaha.backgroundyoutubeplayer.video.DaggerVideoComponent;
 import io.github.garywahaha.backgroundyoutubeplayer.video.Video;
+import io.github.garywahaha.backgroundyoutubeplayer.video.VideoComponent;
 
 /**
  * Created by Gary on 25/5/2016.
@@ -41,6 +44,17 @@ public class VideoListFragment
 	String playlistRawID;
 	VideoListAdapter videoListAdapter;
 
+	private VideoComponent videoComponent;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		videoComponent = DaggerVideoComponent.builder()
+		                                     .appComponent(getApp().getAppComponent())
+		                                     .build();
+	}
+
 	@Nullable
 	@Override
 	public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -58,6 +72,14 @@ public class VideoListFragment
 		videoListAdapter = new VideoListAdapter(getActivity());
 		recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 		recyclerView.setAdapter(videoListAdapter);
+
+		contentView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				loadData(true);
+			}
+		});
+
 		loadData(false);
 	}
 
@@ -68,13 +90,14 @@ public class VideoListFragment
 
 	@Override
 	public VideoListPresenter createPresenter() {
-		return new VideoListPresenter(playlistRawID);
+		return new VideoListPresenter(videoComponent, playlistRawID);
 	}
 
 	@Override
 	public void setData(List<Video> data) {
 		videoListAdapter.setVideoList(data);
 		videoListAdapter.notifyDataSetChanged();
+		contentView.setRefreshing(false);
 	}
 
 	@Override
@@ -87,5 +110,9 @@ public class VideoListFragment
 		Intent serviceIntent = new Intent(this.getActivity(), NotificationService.class);
 		serviceIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
 		getActivity().startService(serviceIntent);
+	}
+
+	protected App getApp() {
+		return (App) getActivity().getApplicationContext();
 	}
 }

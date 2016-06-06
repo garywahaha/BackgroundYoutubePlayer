@@ -51,6 +51,7 @@ public class PlaylistListPresenter extends MvpNullObjectBasePresenter<PlaylistLi
 		}
 		else {
 			List<Playlist> playlists = playlistModel.getAll();
+			System.out.println("playlist length: " + playlists.size());
 			getView().setData(playlists);
 			getView().showContent();
 		}

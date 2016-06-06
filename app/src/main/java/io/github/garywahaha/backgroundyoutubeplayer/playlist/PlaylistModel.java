@@ -56,14 +56,12 @@ public class PlaylistModel {
 		}
 	}
 
-
 	public String getToken(SharedPreferences sharedPreferences) {
 		return sharedPreferences.getString(
 				io.github.garywahaha.backgroundyoutubeplayer.auth.Constants.KEY_TOKEN,
 				null
 		);
 	}
-
 
 	private class PlaylistListAsyncTask extends AsyncTask<Void, Void, List<Playlist>> {
 
@@ -111,8 +109,8 @@ public class PlaylistModel {
 			super.onPostExecute(playlists);
 
 			if (e == null) {
-				callbacks.onSuccess();
 				saveAll(playlists);
+				callbacks.onSuccess();
 			}
 			else {
 				callbacks.onError(e);
