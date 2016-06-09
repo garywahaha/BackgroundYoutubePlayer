@@ -38,7 +38,7 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.Vide
 
 	private final Context context;
 	private final LayoutInflater layoutInflater;
-	private final List<Video> videoList;
+	private final ArrayList<Video> videoList;
 
 	public VideoListAdapter(Context context) {
 		this.context = context;
@@ -69,5 +69,9 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.Vide
 	public void setVideoList(List<Video> videoList) {
 		this.videoList.clear();
 		this.videoList.addAll(videoList);
+	}
+
+	public ArrayList<Video> getVideoList() {
+		return this.videoList;
 	}
 }

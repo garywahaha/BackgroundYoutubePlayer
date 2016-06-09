@@ -13,15 +13,15 @@ import android.widget.ImageButton;
 
 import com.hannesdorfmann.mosby.mvp.lce.MvpLceFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.github.garywahaha.backgroundyoutubeplayer.App;
-import io.github.garywahaha.backgroundyoutubeplayer.service.Constants;
-import io.github.garywahaha.backgroundyoutubeplayer.service.NotificationService;
 import io.github.garywahaha.backgroundyoutubeplayer.R;
+import io.github.garywahaha.backgroundyoutubeplayer.service.NotificationService;
 import io.github.garywahaha.backgroundyoutubeplayer.video.DaggerVideoComponent;
 import io.github.garywahaha.backgroundyoutubeplayer.video.Video;
 import io.github.garywahaha.backgroundyoutubeplayer.video.VideoComponent;
@@ -107,8 +107,8 @@ public class VideoListFragment
 
 	@OnClick(R.id.fragment_video_list_play_button)
 	public void onPlayButtonClicked() {
-		Intent serviceIntent = new Intent(this.getActivity(), NotificationService.class);
-		serviceIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+		ArrayList<Video> videoList = videoListAdapter.getVideoList();
+		Intent serviceIntent = NotificationService.getIntent(this.getContext(), videoList);
 		getActivity().startService(serviceIntent);
 	}
 

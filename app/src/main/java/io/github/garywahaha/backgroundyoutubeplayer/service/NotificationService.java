@@ -3,6 +3,7 @@ package io.github.garywahaha.backgroundyoutubeplayer.service;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.IBinder;
@@ -13,10 +14,13 @@ import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 import at.huber.youtubeExtractor.YouTubeUriExtractor;
 import at.huber.youtubeExtractor.YtFile;
 import io.github.garywahaha.backgroundyoutubeplayer.MainActivity;
 import io.github.garywahaha.backgroundyoutubeplayer.R;
+import io.github.garywahaha.backgroundyoutubeplayer.video.Video;
 
 /**
  * Created by Gary on 24/4/2016.
@@ -26,6 +30,9 @@ public class NotificationService extends Service {
 
 	MediaPlayer mediaPlayer;
 	Notification status;
+
+	ArrayList<Video> videos;
+	int position;
 
 	public void onDestroy() {
 		super.onDestroy();
@@ -48,7 +55,9 @@ public class NotificationService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		if (intent.getAction().equals(Constants.ACTION.STARTFOREGROUND_ACTION)) {
 			showNotification();
-			playMusic();
+			videos = intent.getParcelableArrayListExtra(Constants.INTENT_KEY.VIDEO_LIST_KEY);
+			position = 0;
+			playMusic(videos.get(position).getVideoUrl());
 			Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show();
 		}
 		else if (intent.getAction().equals(Constants.ACTION.PREV_ACTION)) {
@@ -66,6 +75,9 @@ public class NotificationService extends Service {
 			}
 		}
 		else if (intent.getAction().equals(Constants.ACTION.NEXT_ACTION)) {
+			position += 1;
+			playMusic(videos.get(position).getVideoUrl());
+			Log.i(LOG_TAG, Integer.toString(position));
 			Toast.makeText(this, "Clicked Next", Toast.LENGTH_SHORT).show();
 			Log.i(LOG_TAG, "Clicked Next");
 		}
@@ -104,7 +116,7 @@ public class NotificationService extends Service {
 		PendingIntent pplayIntent = PendingIntent.getService(this, 0, playIntent, 0);
 
 		Intent nextIntent = new Intent(this, NotificationService.class);
-		nextIntent.setAction(Constants.ACTION.PREV_ACTION);
+		nextIntent.setAction(Constants.ACTION.NEXT_ACTION);
 		PendingIntent pnextIntent = PendingIntent.getService(this, 0, nextIntent, 0);
 
 		Intent closeIntent = new Intent(this, NotificationService.class);
@@ -143,27 +155,30 @@ public class NotificationService extends Service {
 		startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, status);
 	}
 
-	private void playMusic() {
-		String videoUrl = "https://www.youtube.com/watch?v=Ya4Fz2RWqq4";
-
+	private void playMusic(String videoUrl) {
+		Log.i(LOG_TAG, videoUrl);
 		YouTubeUriExtractor youTubeUriExtractor = new YouTubeUriExtractor(this) {
 			@Override
 			public void onUrisAvailable(String s, String s1, SparseArray<YtFile> ytFiles) {
 				if (ytFiles != null) {
-					int itag = 22;
-					String downloadUrl = ytFiles.get(itag).getUrl();
+					YtFile ytFile = ytFiles.get(140);
+					if (ytFile == null) {
+						ytFile = ytFiles.get(18);
+					}
+					String downloadUrl = ytFile.getUrl();
 
 					try {
-						mediaPlayer.setDataSource(downloadUrl);
-
-						mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-							@Override
-							public void onPrepared(MediaPlayer mediaPlayer) {
-								mediaPlayer.start();
-							}
-						});
-
-						mediaPlayer.prepareAsync();
+						if (mediaPlayer != null) {
+							mediaPlayer.reset();
+							mediaPlayer.setDataSource(downloadUrl);
+							mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+								@Override
+								public void onPrepared(MediaPlayer mediaPlayer) {
+									mediaPlayer.start();
+								}
+							});
+							mediaPlayer.prepareAsync();
+						}
 					}
 					catch (Exception e) {
 						e.printStackTrace();
@@ -172,5 +187,12 @@ public class NotificationService extends Service {
 			}
 		};
 		youTubeUriExtractor.execute(videoUrl);
+	}
+
+	public static Intent getIntent(Context context, ArrayList<Video> list) {
+		Intent intent = new Intent(context, NotificationService.class);
+		intent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+		intent.putParcelableArrayListExtra(Constants.INTENT_KEY.VIDEO_LIST_KEY, list);
+		return intent;
 	}
 }

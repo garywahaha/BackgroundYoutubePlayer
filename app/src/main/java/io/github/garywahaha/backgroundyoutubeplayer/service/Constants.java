@@ -10,18 +10,22 @@ import io.github.garywahaha.backgroundyoutubeplayer.R;
  * Created by Gary on 24/4/2016.
  */
 public class Constants {
-	public interface ACTION {
-		public static String MAIN_ACTION = "io.github.garywahaha.action.main";
-		public static String INIT_ACTION = "io.github.garywahaha.action.init";
-		public static String PREV_ACTION = "io.github.garywahaha.action.prev";
-		public static String PLAY_ACTION = "io.github.garywahaha.action.play";
-		public static String NEXT_ACTION = "io.github.garywahaha.action.next";
-		public static String STARTFOREGROUND_ACTION = "io.github.garywahaha.action.startforeground";
-		public static String STOPFOREGROUND_ACTION = "io.github.garywahaha.action.stopforeground";
+	public static final class ACTION {
+		public static final String MAIN_ACTION = "io.github.garywahaha.action.main";
+		public static final String INIT_ACTION = "io.github.garywahaha.action.init";
+		public static final String PREV_ACTION = "io.github.garywahaha.action.prev";
+		public static final String PLAY_ACTION = "io.github.garywahaha.action.play";
+		public static final String NEXT_ACTION = "io.github.garywahaha.action.next";
+		public static final String STARTFOREGROUND_ACTION = "io.github.garywahaha.action.startforeground";
+		public static final String STOPFOREGROUND_ACTION = "io.github.garywahaha.action.stopforeground";
 	}
 
-	public interface NOTIFICATION_ID {
-		public static int FOREGROUND_SERVICE = 101;
+	public static final class NOTIFICATION_ID {
+		public static final int FOREGROUND_SERVICE = 101;
+	}
+
+	public static final class INTENT_KEY {
+		public static final String VIDEO_LIST_KEY = "io.github.garywahaha.service.intent.key.video.list";
 	}
 
 	public static Bitmap getDefaultAlbumArt(Context context) {

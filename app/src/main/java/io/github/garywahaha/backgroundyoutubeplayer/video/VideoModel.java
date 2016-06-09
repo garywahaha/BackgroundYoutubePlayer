@@ -91,7 +91,7 @@ public class VideoModel {
 		protected List<Video> doInBackground(Void... voids) {
 			try {
 				System.out.println("Start getting videos");
-				YouTube.PlaylistItems.List playlistItemsReq = youtube.playlistItems().list("snippet");
+				YouTube.PlaylistItems.List playlistItemsReq = youtube.playlistItems().list("snippet,contentDetails");
 				playlistItemsReq.setOauthToken(oauthToken);
 				playlistItemsReq.setPlaylistId(playlist.getPlaylistId());
 				playlistItemsReq.setMaxResults(50L);
@@ -104,8 +104,9 @@ public class VideoModel {
 					video.setTitle(x.getSnippet().getTitle());
 					video.setThumbnailUrl(x.getSnippet().getThumbnails().getDefault().getUrl());
 					video.setPlaylist(playlist);
+					video.setVideoId(x.getContentDetails().getVideoId());
 					target.add(video);
-					System.out.println(video.getTitle());
+					//System.out.println(video.getVideoId());
 				}
 				return target;
 			}
