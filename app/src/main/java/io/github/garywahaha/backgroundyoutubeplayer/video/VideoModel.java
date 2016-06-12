@@ -2,6 +2,7 @@ package io.github.garywahaha.backgroundyoutubeplayer.video;
 
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.PlaylistItemListResponse;
@@ -16,6 +17,8 @@ import io.github.garywahaha.backgroundyoutubeplayer.playlist.Playlist;
  * Created by Gary on 5/6/2016.
  */
 public class VideoModel {
+	private static final String LOG_TAG = VideoModel.class.getSimpleName();
+
 	private YouTube youTube;
 	private SharedPreferences sharedPreferences;
 
@@ -90,24 +93,38 @@ public class VideoModel {
 		@Override
 		protected List<Video> doInBackground(Void... voids) {
 			try {
-				System.out.println("Start getting videos");
-				YouTube.PlaylistItems.List playlistItemsReq = youtube.playlistItems().list("snippet,contentDetails");
-				playlistItemsReq.setOauthToken(oauthToken);
-				playlistItemsReq.setPlaylistId(playlist.getPlaylistId());
-				playlistItemsReq.setMaxResults(50L);
-				PlaylistItemListResponse resp = playlistItemsReq.execute();
-				List<com.google.api.services.youtube.model.PlaylistItem> result = resp.getItems();
 				List<Video> target = new ArrayList<>();
-				System.out.println("Done");
-				for (com.google.api.services.youtube.model.PlaylistItem x : result) {
-					Video video = new Video();
-					video.setTitle(x.getSnippet().getTitle());
-					video.setThumbnailUrl(x.getSnippet().getThumbnails().getDefault().getUrl());
-					video.setPlaylist(playlist);
-					video.setVideoId(x.getContentDetails().getVideoId());
-					target.add(video);
-					//System.out.println(video.getVideoId());
-				}
+				String nextPageToken = null;
+				do {
+					Log.d(LOG_TAG, "fetching videos");
+					Log.d(LOG_TAG, "Page: " + nextPageToken);
+					YouTube.PlaylistItems.List playlistItemsReq = youtube.playlistItems().list("snippet,contentDetails");
+					playlistItemsReq.setOauthToken(oauthToken);
+					playlistItemsReq.setPlaylistId(playlist.getPlaylistId());
+					playlistItemsReq.setMaxResults(50L);
+					if (nextPageToken != null) playlistItemsReq.setPageToken(nextPageToken);
+
+					PlaylistItemListResponse resp = playlistItemsReq.execute();
+					List<com.google.api.services.youtube.model.PlaylistItem> result = resp.getItems();
+
+					if (result.isEmpty()) break;
+
+					nextPageToken = resp.getNextPageToken();
+					Log.d(LOG_TAG, "Next Page: " + nextPageToken);
+					for (com.google.api.services.youtube.model.PlaylistItem x : result) {
+						try {
+							Video video = new Video();
+							video.setTitle(x.getSnippet().getTitle());
+							video.setThumbnailUrl(x.getSnippet().getThumbnails().getDefault().getUrl());
+							video.setPlaylist(playlist);
+							video.setVideoId(x.getContentDetails().getVideoId());
+							target.add(video);
+						}
+						catch (Exception e) {
+							Log.e(LOG_TAG, e.getMessage());
+						}
+					}
+				} while (nextPageToken != null);
 				return target;
 			}
 			catch (Exception e) {

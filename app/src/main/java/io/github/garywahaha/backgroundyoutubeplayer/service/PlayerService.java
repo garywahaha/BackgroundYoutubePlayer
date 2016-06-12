@@ -1,18 +1,24 @@
 package io.github.garywahaha.backgroundyoutubeplayer.service;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.NotificationTarget;
 
 import java.util.ArrayList;
 
@@ -25,11 +31,14 @@ import io.github.garywahaha.backgroundyoutubeplayer.video.Video;
 /**
  * Created by Gary on 24/4/2016.
  */
-public class NotificationService extends Service {
+public class PlayerService extends Service implements MediaPlayer.OnCompletionListener {
 	public static final String LOG_TAG = NOTIFICATION_SERVICE.getClass().getSimpleName();
 
 	MediaPlayer mediaPlayer;
+	WifiManager.WifiLock wifiLock;
+
 	Notification status;
+	NotificationTarget notificationTarget;
 
 	ArrayList<Video> videos;
 	int position;
@@ -43,6 +52,15 @@ public class NotificationService extends Service {
 		super.onCreate();
 
 		mediaPlayer = new MediaPlayer();
+		mediaPlayer.setOnCompletionListener(this);
+		mediaPlayer.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
+
+		// TODO: Move lock tag to constant
+		wifiLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE)).createWifiLock(
+				WifiManager.WIFI_MODE_FULL,
+		        "mylock"
+		);
+		wifiLock.acquire();
 	}
 
 	@Nullable
@@ -54,15 +72,14 @@ public class NotificationService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		if (intent.getAction().equals(Constants.ACTION.STARTFOREGROUND_ACTION)) {
-			showNotification();
 			videos = intent.getParcelableArrayListExtra(Constants.INTENT_KEY.VIDEO_LIST_KEY);
 			position = 0;
-			playMusic(videos.get(position).getVideoUrl());
+			showNotification(videos.get(position));
+			playMusic(videos.get(position));
 			Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show();
 		}
 		else if (intent.getAction().equals(Constants.ACTION.PREV_ACTION)) {
-			Toast.makeText(this, "Clicked Prev", Toast.LENGTH_SHORT).show();
-			Log.i(LOG_TAG, "Clicked Prev");
+			playPrev();
 		}
 		else if (intent.getAction().equals(Constants.ACTION.PLAY_ACTION)) {
 			Toast.makeText(this, "Clicked Play", Toast.LENGTH_SHORT).show();
@@ -75,24 +92,23 @@ public class NotificationService extends Service {
 			}
 		}
 		else if (intent.getAction().equals(Constants.ACTION.NEXT_ACTION)) {
-			position += 1;
-			playMusic(videos.get(position).getVideoUrl());
-			Log.i(LOG_TAG, Integer.toString(position));
-			Toast.makeText(this, "Clicked Next", Toast.LENGTH_SHORT).show();
-			Log.i(LOG_TAG, "Clicked Next");
+			playNext();
 		}
 		else if (intent.getAction().equals(Constants.ACTION.STOPFOREGROUND_ACTION)) {
 			Toast.makeText(this, "Service Stopped", Toast.LENGTH_SHORT).show();
 			Log.i(LOG_TAG, "Clicked stop foreground");
 			mediaPlayer.release();
-			stopForeground(true);
+			wifiLock.release();
+			NotificationManager notificationManager = (NotificationManager) this
+					.getSystemService(Context.NOTIFICATION_SERVICE);
+			notificationManager.cancel(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE);
 			stopSelf();
 		}
 
 		return START_STICKY;
 	}
 
-	private void showNotification() {
+	private void showNotification(Video video) {
 		RemoteViews views = new RemoteViews(getPackageName(), R.layout.status_bar);
 		RemoteViews bigViews = new RemoteViews(getPackageName(), R.layout.status_bar_expanded);
 
@@ -107,19 +123,19 @@ public class NotificationService extends Service {
 		);
 		PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-		Intent previousIntent = new Intent(this, NotificationService.class);
+		Intent previousIntent = new Intent(this, PlayerService.class);
 		previousIntent.setAction(Constants.ACTION.PREV_ACTION);
 		PendingIntent ppreviousIntent = PendingIntent.getService(this, 0, previousIntent, 0);
 
-		Intent playIntent = new Intent(this, NotificationService.class);
+		Intent playIntent = new Intent(this, PlayerService.class);
 		playIntent.setAction(Constants.ACTION.PLAY_ACTION);
 		PendingIntent pplayIntent = PendingIntent.getService(this, 0, playIntent, 0);
 
-		Intent nextIntent = new Intent(this, NotificationService.class);
+		Intent nextIntent = new Intent(this, PlayerService.class);
 		nextIntent.setAction(Constants.ACTION.NEXT_ACTION);
 		PendingIntent pnextIntent = PendingIntent.getService(this, 0, nextIntent, 0);
 
-		Intent closeIntent = new Intent(this, NotificationService.class);
+		Intent closeIntent = new Intent(this, PlayerService.class);
 		closeIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
 		PendingIntent pcloseIntent = PendingIntent.getService(this, 0, closeIntent, 0);
 
@@ -138,8 +154,8 @@ public class NotificationService extends Service {
 		views.setImageViewResource(R.id.status_bar_play, R.drawable.apollo_holo_dark_pause);
 		bigViews.setImageViewResource(R.id.status_bar_play, R.drawable.apollo_holo_dark_pause);
 
-		views.setTextViewText(R.id.status_bar_track_name, "Song Title");
-		bigViews.setTextViewText(R.id.status_bar_track_name, "Song Title");
+		views.setTextViewText(R.id.status_bar_track_name, video.getTitle());
+		bigViews.setTextViewText(R.id.status_bar_track_name, video.getTitle());
 
 		views.setTextViewText(R.id.status_bar_artist_name, "Artist Nmae");
 		bigViews.setTextViewText(R.id.status_bar_artist_name, "Artist Nmae");
@@ -152,11 +168,31 @@ public class NotificationService extends Service {
 		status.flags = Notification.FLAG_ONGOING_EVENT;
 		status.icon = R.drawable.ic_launcher;
 		status.contentIntent = pendingIntent;
-		startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, status);
+
+		notificationTarget = new NotificationTarget(
+				this,
+		        bigViews,
+		        R.id.status_bar_album_art,
+		        status,
+				Constants.NOTIFICATION_ID.FOREGROUND_SERVICE
+		);
+
+		NotificationManager notificationManager = (NotificationManager) this
+				.getSystemService(Context.NOTIFICATION_SERVICE);
+
+		notificationManager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, status);
 	}
 
-	private void playMusic(String videoUrl) {
+	private void playMusic(Video video) {
+		String videoUrl = video.getVideoUrl();
+
 		Log.i(LOG_TAG, videoUrl);
+
+		Glide.with(this)
+				.load(video.getThumbnailUrl())
+				.asBitmap()
+				.into(notificationTarget);
+
 		YouTubeUriExtractor youTubeUriExtractor = new YouTubeUriExtractor(this) {
 			@Override
 			public void onUrisAvailable(String s, String s1, SparseArray<YtFile> ytFiles) {
@@ -189,8 +225,35 @@ public class NotificationService extends Service {
 		youTubeUriExtractor.execute(videoUrl);
 	}
 
+	private void playNext() {
+		if (position + 1 > videos.size()) {
+			Toast.makeText(this, "Last item", Toast.LENGTH_SHORT).show();
+		}
+		else {
+			position += 1;
+			showNotification(videos.get(position));
+			playMusic(videos.get(position));
+		}
+	}
+
+	private void playPrev() {
+		if (position == 0) {
+			Toast.makeText(this, "First item", Toast.LENGTH_SHORT).show();
+		}
+		else {
+			position -= 1;
+			showNotification(videos.get(position));
+			playMusic(videos.get(position));
+		}
+	}
+
+	@Override
+	public void onCompletion(MediaPlayer mediaPlayer) {
+		playNext();
+	}
+
 	public static Intent getIntent(Context context, ArrayList<Video> list) {
-		Intent intent = new Intent(context, NotificationService.class);
+		Intent intent = new Intent(context, PlayerService.class);
 		intent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
 		intent.putParcelableArrayListExtra(Constants.INTENT_KEY.VIDEO_LIST_KEY, list);
 		return intent;

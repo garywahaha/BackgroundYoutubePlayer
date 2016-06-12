@@ -18,7 +18,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import io.github.garywahaha.backgroundyoutubeplayer.auth.LoginActivity;
 import io.github.garywahaha.backgroundyoutubeplayer.service.Constants;
-import io.github.garywahaha.backgroundyoutubeplayer.service.NotificationService;
+import io.github.garywahaha.backgroundyoutubeplayer.service.PlayerService;
 
 public class MainActivity
 		extends AppCompatActivity {
@@ -83,7 +83,7 @@ public class MainActivity
 	}
 
 	public void startService(View v) {
-		Intent serviceIntent = new Intent(MainActivity.this, NotificationService.class);
+		Intent serviceIntent = new Intent(MainActivity.this, PlayerService.class);
 		serviceIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
 		startService(serviceIntent);
 	}
