@@ -13,12 +13,17 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    packagingOptions {
+        exclude 'asm-license.txt'
     }
 }
 
@@ -43,6 +48,8 @@ dependencies {
     // Dagger 2
     apt 'com.google.dagger:dagger-compiler:2.2'
     compile 'com.google.dagger:dagger:2.2'
+    testCompile 'com.google.dagger:dagger:2.2'
+    androidTestCompile 'com.google.dagger:dagger:2.2'
     provided 'javax.annotation:jsr250-api:1.0'
 
     // Glide
@@ -53,6 +60,26 @@ dependencies {
     apt "com.github.Raizlabs.DBFlow:dbflow-processor:${dbflow_version}"
     compile "com.github.Raizlabs.DBFlow:dbflow-core:${dbflow_version}"
     compile "com.github.Raizlabs.DBFlow:dbflow:${dbflow_version}"
+
+    /* Unit Test */
+    compile 'com.google.code.findbugs:jsr305:2.0.1'
+    // Mockito
+    testCompile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-core:1.10.19"
+    // DaggerMock
+    testCompile 'com.github.fabioCollini:DaggerMock:0.5'
+    androidTestCompile 'com.github.fabioCollini:DaggerMock:0.5'
+    // Robolectric
+    testCompile "org.robolectric:robolectric:3.1"
+    // Espresso
+    testCompile 'com.android.support:support-annotations:23.4.0'
+    androidTestCompile 'com.android.support:support-annotations:23.4.0'
+    androidTestCompile 'com.android.support.test:runner:0.4.1'
+    androidTestCompile 'com.android.support.test:rules:0.4.1'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
+    // Assertj
+    androidTestCompile 'com.squareup.assertj:assertj-android:1.1.1'
+    testCompile 'com.squareup.assertj:assertj-android:1.1.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
