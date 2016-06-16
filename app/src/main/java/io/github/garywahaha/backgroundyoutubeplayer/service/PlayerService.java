@@ -1,7 +1,6 @@
 package io.github.garywahaha.backgroundyoutubeplayer.service;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -99,9 +98,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 			Log.i(LOG_TAG, "Clicked stop foreground");
 			mediaPlayer.release();
 			wifiLock.release();
-			NotificationManager notificationManager = (NotificationManager) this
-					.getSystemService(Context.NOTIFICATION_SERVICE);
-			notificationManager.cancel(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE);
+			stopForeground(true);
 			stopSelf();
 		}
 
@@ -177,10 +174,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 				Constants.NOTIFICATION_ID.FOREGROUND_SERVICE
 		);
 
-		NotificationManager notificationManager = (NotificationManager) this
-				.getSystemService(Context.NOTIFICATION_SERVICE);
-
-		notificationManager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, status);
+		startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, status);
 	}
 
 	private void playMusic(Video video) {
