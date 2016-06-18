@@ -21,4 +21,10 @@ public class AuthModule {
 	                                  @Named("scope") String scope) {
 		return new LoginManager(context, sharedPreferences, scope);
 	}
+
+	@Provides
+	@Singleton
+	LoginPresenter providesLoginPresenter(LoginManager loginManager) {
+		return new LoginPresenter(loginManager);
+	}
 }

@@ -14,6 +14,8 @@ import java.util.List;
  * Created by Gary on 4/6/2016.
  */
 public class PlaylistModel {
+	private static final String LOG_TAG = PlaylistModel.class.getSimpleName();
+
 	private YouTube youTube;
 	private SharedPreferences sharedPreferences;
 

@@ -5,6 +5,7 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
@@ -13,6 +14,8 @@ import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.SignInButton;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -35,8 +38,18 @@ public class LoginFragment
 	@BindView(R.id.fragment_login_signin_button)
 	SignInButton signinButton;
 
+	@Inject
+	LoginPresenter loginPresenter;
+
 	protected int getLayoutRes() {
 		return R.layout.fragment_login;
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		getApp().getAppComponent().inject(this);
 	}
 
 	@Override
@@ -91,12 +104,12 @@ public class LoginFragment
 	@NonNull
 	@Override
 	public LoginPresenter createPresenter() {
-		return new LoginPresenter(getApp().getAppComponent());
+		return loginPresenter;
 	}
 
 	@OnClick(R.id.fragment_login_signin_button)
 	public void onLoginClicked() {
-		getPresenter().login();
+		loginPresenter.login();
 	}
 
 	@Override
@@ -109,12 +122,12 @@ public class LoginFragment
 				String type = data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
 				Account account = new Account(email, type);
 
-				getPresenter().handleAccount(account);
+				loginPresenter.handleAccount(account);
 			}
 		} else if ((requestCode == REQUEST_CODE_RECOVER_FROM_AUTH_ERROR ||
 				requestCode == REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR)
 				&& resultCode == Activity.RESULT_OK) {
-			getPresenter().login();
+			loginPresenter.login();
 		}
 	}
 

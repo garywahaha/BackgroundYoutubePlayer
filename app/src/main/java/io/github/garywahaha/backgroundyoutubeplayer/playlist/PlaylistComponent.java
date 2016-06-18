@@ -2,6 +2,7 @@ package io.github.garywahaha.backgroundyoutubeplayer.playlist;
 
 import dagger.Component;
 import io.github.garywahaha.backgroundyoutubeplayer.AppComponent;
+import io.github.garywahaha.backgroundyoutubeplayer.playlist.list.PlaylistListFragment;
 import io.github.garywahaha.backgroundyoutubeplayer.playlist.list.PlaylistListPresenter;
 
 /**
@@ -13,7 +14,7 @@ import io.github.garywahaha.backgroundyoutubeplayer.playlist.list.PlaylistListPr
 		modules = {PlaylistModule.class}
 )
 public interface PlaylistComponent {
-	PlaylistModel PLAYLIST_MODEL();
+	PlaylistListPresenter PLAYLIST_LIST_PRESENTER();
 
-	void inject(PlaylistListPresenter playlistListPresenter);
+	void inject(PlaylistListFragment playlistListFragment);
 }

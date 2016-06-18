@@ -1,6 +1,5 @@
 package io.github.garywahaha.backgroundyoutubeplayer.playlist.list;
 
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,22 +42,20 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
 		void onPlaylistClicked(Playlist playlist);
 	}
 
-	private final Context context;
-	private final LayoutInflater layoutInflater;
 	private final List<Playlist> playlists;
 
 	private final PlaylistsAdapterHandler handler;
 
-	public PlaylistListAdapter(Context context, PlaylistsAdapterHandler handler) {
+	public PlaylistListAdapter(PlaylistsAdapterHandler handler) {
 		this.playlists = new ArrayList<>();
-		this.context = context;
-		this.layoutInflater = LayoutInflater.from(context);
 		this.handler = handler;
 	}
 
 	@Override
 	public PlaylistViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-		return new PlaylistViewHolder(layoutInflater.inflate(R.layout.playlist, viewGroup, false));
+		View view = LayoutInflater.from(viewGroup.getContext())
+				.inflate(R.layout.playlist, viewGroup, false);
+		return new PlaylistViewHolder(view);
 	}
 
 	@Override
@@ -73,7 +70,7 @@ public class PlaylistListAdapter extends RecyclerView.Adapter<PlaylistListAdapte
 		});
 		playlistViewHolder.itemCountView.setText(target.getItemCount().toString());
 
-		Glide.with(context)
+		Glide.with(playlistViewHolder.thumbnailView.getContext())
 				.load(target.getThumbnailUrl())
 				.into(playlistViewHolder.thumbnailView);
 	}

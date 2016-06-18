@@ -2,6 +2,7 @@ package io.github.garywahaha.backgroundyoutubeplayer.video;
 
 import dagger.Component;
 import io.github.garywahaha.backgroundyoutubeplayer.AppComponent;
+import io.github.garywahaha.backgroundyoutubeplayer.video.list.VideoListFragment;
 import io.github.garywahaha.backgroundyoutubeplayer.video.list.VideoListPresenter;
 
 /**
@@ -13,7 +14,7 @@ import io.github.garywahaha.backgroundyoutubeplayer.video.list.VideoListPresente
 		modules = {VideoModule.class}
 )
 public interface VideoComponent {
-	VideoModel VIDEO_MODEL();
+	VideoListPresenter VIDEO_LIST_PRESENTER();
 
-	void inject(VideoListPresenter videoListPresenter);
+	void inject(VideoListFragment videoListFragment);
 }

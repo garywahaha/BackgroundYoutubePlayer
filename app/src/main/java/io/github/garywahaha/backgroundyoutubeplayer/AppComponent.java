@@ -10,7 +10,7 @@ import javax.inject.Singleton;
 
 import dagger.Component;
 import io.github.garywahaha.backgroundyoutubeplayer.auth.AuthModule;
-import io.github.garywahaha.backgroundyoutubeplayer.auth.LoginPresenter;
+import io.github.garywahaha.backgroundyoutubeplayer.auth.LoginFragment;
 
 /**
  * Created by Gary on 3/6/2016.
@@ -28,5 +28,5 @@ public interface AppComponent {
 
 	SharedPreferences SHARED_PREFERENCES();
 
-	void inject(LoginPresenter loginPresenter);
+	void inject(LoginFragment loginFragment);
 }

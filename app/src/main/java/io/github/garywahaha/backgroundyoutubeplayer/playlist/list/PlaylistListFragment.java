@@ -14,6 +14,8 @@ import com.hannesdorfmann.mosby.mvp.lce.MvpLceFragment;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.github.garywahaha.backgroundyoutubeplayer.App;
@@ -33,6 +35,9 @@ public class PlaylistListFragment
 	@BindView(R.id.fragment_playlists_recycler_view)
 	RecyclerView recyclerView;
 
+	@Inject
+	PlaylistListPresenter playlistListPresenter;
+
 	private PlaylistComponent playlistComponent;
 
 	PlaylistListAdapter playlistListAdapter;
@@ -43,6 +48,7 @@ public class PlaylistListFragment
 		playlistComponent = DaggerPlaylistComponent.builder()
 		                                           .appComponent(getApp().getAppComponent())
 		                                           .build();
+		playlistComponent.inject(this);
 	}
 
 	@Nullable
@@ -56,7 +62,7 @@ public class PlaylistListFragment
 		super.onViewCreated(view, savedInstanceState);
 		ButterKnife.bind(this, view);
 
-		playlistListAdapter = new PlaylistListAdapter(getActivity(), this);
+		playlistListAdapter = new PlaylistListAdapter(this);
 		recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 		recyclerView.setAdapter(playlistListAdapter);
 
@@ -77,7 +83,7 @@ public class PlaylistListFragment
 
 	@Override
 	public PlaylistListPresenter createPresenter() {
-		return new PlaylistListPresenter(playlistComponent);
+		return playlistListPresenter;
 	}
 
 	@Override

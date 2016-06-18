@@ -23,9 +23,9 @@ import java.util.ArrayList;
 
 import at.huber.youtubeExtractor.YouTubeUriExtractor;
 import at.huber.youtubeExtractor.YtFile;
-import io.github.garywahaha.backgroundyoutubeplayer.MainActivity;
 import io.github.garywahaha.backgroundyoutubeplayer.R;
 import io.github.garywahaha.backgroundyoutubeplayer.video.Video;
+import io.github.garywahaha.backgroundyoutubeplayer.video.list.VideoListActivity;
 
 /**
  * Created by Gary on 24/4/2016.
@@ -113,7 +113,7 @@ public class PlayerService extends Service implements MediaPlayer.OnCompletionLi
 		views.setViewVisibility(R.id.status_bar_album_art, View.GONE);
 		bigViews.setImageViewBitmap(R.id.status_bar_album_art, Constants.getDefaultAlbumArt(this));
 
-		Intent notificationIntent = new Intent(this, MainActivity.class);
+		Intent notificationIntent = new Intent(this, VideoListActivity.class);
 		notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
 		notificationIntent.setFlags(
 				Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK

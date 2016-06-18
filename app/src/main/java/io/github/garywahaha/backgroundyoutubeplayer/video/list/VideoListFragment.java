@@ -16,6 +16,8 @@ import com.hannesdorfmann.mosby.mvp.lce.MvpLceFragment;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -41,6 +43,9 @@ public class VideoListFragment
 	@BindView(R.id.fragment_video_list_play_button)
 	ImageButton playButton;
 
+	@Inject
+	VideoListPresenter videoListPresenter;
+
 	String playlistRawID;
 	VideoListAdapter videoListAdapter;
 
@@ -53,6 +58,7 @@ public class VideoListFragment
 		videoComponent = DaggerVideoComponent.builder()
 		                                     .appComponent(getApp().getAppComponent())
 		                                     .build();
+		videoComponent.inject(this);
 	}
 
 	@Nullable
@@ -90,7 +96,7 @@ public class VideoListFragment
 
 	@Override
 	public VideoListPresenter createPresenter() {
-		return new VideoListPresenter(videoComponent, playlistRawID);
+		return videoListPresenter;
 	}
 
 	@Override
@@ -102,7 +108,7 @@ public class VideoListFragment
 
 	@Override
 	public void loadData(boolean pullToRefresh) {
-		presenter.loadVideos(pullToRefresh);
+		presenter.loadVideos(playlistRawID, pullToRefresh);
 	}
 
 	@OnClick(R.id.fragment_video_list_play_button)
